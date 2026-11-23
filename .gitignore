@@ -1,0 +1,6 @@
+.env
+.env.*
+*keypair*.json
+credentials
+__pycache__/
+out/
