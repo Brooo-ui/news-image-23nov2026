@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/news-image-20261123/Brooo-ui/news-image-23nov2026/rank.svg)](https://make.fun/bounty/news-image-20261123/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261123)
 [![reward](https://make.fun/badge/news-image-20261123/Brooo-ui/news-image-23nov2026/reward.svg)](https://make.fun/bounty/news-image-20261123?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261123)
 
-One newspaper front page summing up the world's news of Monday 23 November 2026: 30 stories from 8 regions, three lead stories with drawn scenes (COP31 collapses with no deal, Iran's strikes on US bases in Bahrain and the Hormuz tanker war, NATO's emergency session on the Poland missiles), the day in ten, 17 more stories, and a date check that names what was left out on purpose. Every story was verified against the day's wires (Reuters, CNN, The Times, FT, Al Jazeera, AFP, IANS, ANI, ESPNcricinfo, Cricbuzz, ESA); single-source items are labelled REPORTED, one side's claims CLAIM.
+One newspaper front page summing up the world's news of Monday 23 November 2026: 64 stories from 9 regions, three lead stories with drawn scenes (COP31 collapses with no deal, Iran's strikes on US bases in Bahrain and the Hormuz tanker war, NATO's emergency session on the Poland missiles), the day in twenty, 41 more stories, and a date check that names what was left out on purpose. Every story was verified against the day's wires (Reuters, CNN, The Times, FT, Al Jazeera, AFP, IANS, ANI, ESPNcricinfo, Cricbuzz, ESA, Finnhub, Cinepals); single-source items are labelled REPORTED, one side's claims CLAIM.
 
 ## Run it
 

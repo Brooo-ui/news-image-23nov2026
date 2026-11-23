@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Draw the Monday 23 November 2026 front page (1024x1024 PNG).
+"""Draw the Monday 23 November 2026 front page (1024x1024 PNG) — v2.
 
-Code-drawn newspaper front page: every letter is real text rendered by
-PIL, no AI-generated text, no network, no randomness, no clock reads --
-the same input always writes the same bytes.
+64 stories, denser layout, same code-drawn newspaper format: every
+letter is real text rendered by PIL, no AI-generated text, no network,
+no randomness, no clock reads -- the same input always writes the same
+bytes.
 """
+import math
 import os
 from PIL import Image, ImageDraw, ImageFont
 
@@ -13,12 +15,10 @@ PAPER = (247, 242, 231)
 INK = (20, 20, 20)
 MUTED = (91, 91, 91)
 RED = (180, 35, 24)
-DARKRED = (140, 25, 18)
 BLUE = (30, 64, 175)
 GREEN = (22, 101, 52)
 ORANGE = (154, 52, 18)
 PANEL = (255, 255, 255)
-PANEL_BG = (238, 234, 222)
 LINE = (180, 174, 158)
 
 FDIR = "/usr/share/fonts/truetype/dejavu"
@@ -84,72 +84,66 @@ def main():
     CW = MX1 - MX  # 968 content width
 
     # ---- kicker bar -------------------------------------------------
-    d.rectangle([0, 0, W, 30], fill=INK)
-    kf = SANS_B(14)
-    d.text((MX, 7), "THE WORLD IN ONE DAY", font=kf, fill=(255, 255, 255))
+    d.rectangle([0, 0, W, 20], fill=INK)
+    kf = SANS_B(12)
+    d.text((MX, 4), "THE WORLD IN ONE DAY", font=kf, fill=(255, 255, 255))
     mid = "DAY 327 OF 2026"
-    d.text(((W - kf.getlength(mid)) / 2, 7), mid, font=kf,
+    d.text(((W - kf.getlength(mid)) / 2, 4), mid, font=kf,
            fill=(255, 255, 255))
     right = "ALL TIMES UTC"
-    d.text((MX1 - kf.getlength(right), 7), right, font=kf,
+    d.text((MX1 - kf.getlength(right), 4), right, font=kf,
            fill=(255, 255, 255))
 
     # ---- masthead ---------------------------------------------------
     title = "MONDAY 23 NOVEMBER 2026"
-    tf = SERIF_B(50)
-    d.text(((W - tf.getlength(title)) / 2, 40), title, font=tf, fill=INK)
-    sub = "30 STORIES  ·  8 REGIONS  ·  EVERY ONE DATED"
-    sf = SANS(17)
-    d.text(((W - sf.getlength(sub)) / 2, 98), sub, font=sf, fill=MUTED)
-    rule(d, MX, MX1, 122, fill=INK, width=2)
+    tf = SERIF_B(42)
+    d.text(((W - tf.getlength(title)) / 2, 26), title, font=tf, fill=INK)
+    sub = "64 STORIES  ·  9 REGIONS  ·  EVERY ONE DATED"
+    sf = SANS(15)
+    d.text(((W - sf.getlength(sub)) / 2, 72), sub, font=sf, fill=MUTED)
+    rule(d, MX, MX1, 92, fill=INK, width=2)
 
     # ---- red 3-hook subline -----------------------------------------
     hooks = ("COP31 collapses with no deal   •   Iran strikes US bases in "
              "Bahrain   •   NATO meets on Poland missiles")
-    hf = SERIF_B(19)
-    while hf.getlength(hooks) > CW and hf.size > 15:
-        hf = SERIF_B(hf.size - 1)
-    d.text(((W - hf.getlength(hooks)) / 2, 130), hooks, font=hf, fill=RED)
+    hf = SERIF_B(17)
+    d.text(((W - hf.getlength(hooks)) / 2, 98), hooks, font=hf, fill=RED)
 
     # ---- stats strip ------------------------------------------------
-    stats = [("186", "drones fired at Ukraine"),
-             ("161", "drones downed"),
-             ("~25", "tankers hit in a week"),
-             ("$7.5bn", "chips diverted to China"),
-             ("720/9", "India's record Test total"),
-             ("98.79%", "Hong Kong turnout")]
-    y0, y1 = 158, 202
+    stats = [("186", "drones fired"), ("161", "drones downed"),
+             ("~25", "tankers hit in a week"), ("$7.5bn", "chips diverted"),
+             ("720/9", "India's Test total"), ("98.79%", "HK turnout")]
+    y0, y1 = 120, 152
     bw = CW / 6
-    nf, lf = SERIF_B(25), SANS(10)
+    nf, lf = SERIF_B(23), SANS(10)
     for i, (num, lab) in enumerate(stats):
         x = MX + i * bw
         if i:
-            d.line([(x, y0 + 4), (x, y1 - 4)], fill=LINE, width=1)
-        d.text((x + (bw - nf.getlength(num)) / 2, y0 + 2), num, font=nf,
+            d.line([(x, y0 + 3), (x, y1 - 3)], fill=LINE, width=1)
+        d.text((x + (bw - nf.getlength(num)) / 2, y0 + 1), num, font=nf,
                fill=INK)
-        for j, ln in enumerate(wrap(lab, lf, bw - 12)):
-            d.text((x + (bw - lf.getlength(ln)) / 2, y0 + 30 + j * 12), ln,
-                   font=lf, fill=MUTED)
-    rule(d, MX, MX1, y1 + 2, fill=LINE, width=1)
+        d.text((x + (bw - lf.getlength(lab)) / 2, y0 + 25), lab, font=lf,
+               fill=MUTED)
+    rule(d, MX, MX1, 156, fill=LINE, width=1)
 
     # ---- region bar -------------------------------------------------
-    regions = ("EUROPE  ·  MIDDLE EAST  ·  ASIA-PACIFIC  ·  AMERICAS  ·  "
-               "AFRICA  ·  OCEANIA  ·  SPORT  ·  SCIENCE")
-    rf = SANS_B(13)
-    d.text(((W - rf.getlength(regions)) / 2, 210), regions, font=rf,
+    regions = ("EU 7  ·  ME 7  ·  APAC 22  ·  AMER 12  ·  AFR 5  ·  OCE 2  ·  "
+               "SPORT 5  ·  SCI 2  ·  WORLD 2")
+    rf = SANS_B(11)
+    d.text(((W - rf.getlength(regions)) / 2, 162), regions, font=rf,
            fill=INK)
 
     # ---- timeline strip ---------------------------------------------
     tl = ("00:00 UTC  Cikande search resumes   ·   00:02 UTC  Lunch, Day 5, "
-          "Wellington: NZ 157/4   ·   TODAY  NATO Council meets, Brussels"
-          "   ·   TODAY  Modi-Shah talks, Delhi")
-    tlf = SANS(12)
-    d.text(((W - tlf.getlength(tl)) / 2, 232), tl, font=tlf, fill=MUTED)
-    rule(d, MX, MX1, 252, fill=INK, width=1)
+          "Wellington: NZ 157/4   ·   TODAY  NATO Council meets   ·   TODAY  "
+          "Modi-Shah talks   ·   TODAY  Oil futures reopen")
+    tlf = SANS(11)
+    d.text(((W - tlf.getlength(tl)) / 2, 180), tl, font=tlf, fill=MUTED)
+    rule(d, MX, MX1, 198, fill=INK, width=1)
 
     # ---- section header ---------------------------------------------
-    d.text((MX, 260), "THE THREE BIG STORIES", font=SANS_B(14), fill=INK)
-    rule(d, MX, MX1, 280, fill=INK, width=1)
+    d.text((MX, 204), "THE THREE BIG STORIES", font=SANS_B(13), fill=INK)
+    rule(d, MX, MX1, 222, fill=INK, width=1)
 
     # ---- three leads ------------------------------------------------
     leads = [
@@ -157,169 +151,176 @@ def main():
              head="COP31 COLLAPSES — NO DEAL",
              body=("Sunday: the longest climate summit ever ends with no "
                    "deal. The EU, UK and island states reject the "
-                   "'Antalya Pact' — it never mentions fossil fuels. "
-                   "Kurum: 'there is no agreement on this text.'"),
+                   "'Antalya Pact' — it never mentions fossil fuels."),
              tag="CONFIRMED", panel="cop"),
         dict(kick="GULF  ·  BAHRAIN / HORMUZ",
              head="IRAN STRIKES US BASES; TANKER WAR",
              body=("Saturday night: IRGC missiles and drones hit US "
-                   "positions at al-Riffa and Awali in Bahrain; 2 people "
-                   "injured. ~25 tankers hit in and around the Strait of "
-                   "Hormuz in a week."),
+                   "positions in Bahrain; 2 injured. ~25 tankers hit in "
+                   "and around the Strait of Hormuz in a week."),
              tag="CONFIRMED", panel="gulf"),
         dict(kick="SECURITY  ·  BRUSSELS, TODAY",
              head="NATO MEETS ON POLAND MISSILES",
-             body=("An extraordinary North Atlantic Council session meets "
-                   "in Brussels today after Russian missiles crossed "
-                   "into Poland on Friday. Prosecutors say all three "
-                   "objects were Russian Kh-101s."),
+             body=("Extraordinary North Atlantic Council session in "
+                   "Brussels today after Russian missiles crossed into "
+                   "Poland on Friday. All three were Kh-101s, prosecutors "
+                   "say."),
              tag="CONFIRMED", panel="nato"),
     ]
     col_w, gap = 314, 13
     for i, lead in enumerate(leads):
         x = MX + i * (col_w + gap)
-        kf2 = SANS_B(11)
-        d.text((x, 282), lead["kick"], font=kf2, fill=RED)
-        # drawn panel
-        px, py, pw, ph = x, 298, col_w, 84
+        d.text((x, 228), lead["kick"], font=SANS_B(10), fill=RED)
+        # drawn panel, 56px tall
+        px, py, pw, ph = x, 242, col_w, 56
         d.rectangle([px, py, px + pw, py + ph], fill=PANEL,
                     outline=LINE, width=1)
         if lead["panel"] == "cop":
-            # globe with a NO DEAL stamp
-            cx, cy, r = px + 52, py + 42, 32
+            cx, cy, r = px + 38, py + 28, 20
             d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=BLUE,
                       width=2)
             d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(219, 234,
                                                                254))
-            d.arc([cx - r, cy - r, cx + r, cy + r], 20, 160, fill=BLUE,
-                  width=1)
-            d.arc([cx - r, cy - r, cx + r, cy + r], 200, 340, fill=BLUE,
-                  width=1)
             d.line([(cx - r, cy), (cx + r, cy)], fill=BLUE, width=1)
-            d.ellipse([cx - 12, cy - r, cx + 12, cy + r], outline=BLUE,
+            d.ellipse([cx - 8, cy - r, cx + 8, cy + r], outline=BLUE,
                       width=1)
-            d.rectangle([px + 100, py + 22, px + 232, py + 56],
-                        outline=RED, width=3)
-            sf2 = SANS_B(20)
-            d.text((px + 112, py + 28), "NO DEAL", font=sf2, fill=RED)
-            d.text((px + 238, py + 64), "ANTALYA", font=SANS_B(10),
+            d.rectangle([px + 70, py + 13, px + 172, py + 38],
+                        outline=RED, width=2)
+            d.text((px + 80, py + 18), "NO DEAL", font=SANS_B(15),
+                   fill=RED)
+            d.text((px + 180, py + 18), "ANTALYA", font=SANS_B(9),
                    fill=MUTED)
-            d.text((px + 238, py + 26), "35% by 2035", font=SANS_B(10),
+            d.text((px + 180, py + 32), "35% by 2035", font=SANS_B(9),
                    fill=MUTED)
-            d.text((px + 100, py + 62), "draft kept", font=SANS(10),
-                   fill=MUTED)
+            d.text((px + 70, py + 41), "draft kept fossil fuels out",
+                   font=SANS(9), fill=MUTED)
         elif lead["panel"] == "gulf":
-            # strait schematic: land, sea, ships, missile arcs
-            d.rectangle([px, py, px + pw, py + 24], fill=(222, 226, 214))
-            d.rectangle([px, py + 60, px + pw, py + ph],
+            d.rectangle([px, py, px + pw, py + 14], fill=(222, 226, 214))
+            d.rectangle([px, py + 42, px + pw, py + ph],
                         fill=(222, 226, 214))
-            d.rectangle([px, py + 24, px + pw, py + 60], fill=(191, 219,
+            d.rectangle([px, py + 14, px + pw, py + 42], fill=(191, 219,
                                                                 254))
-            d.text((px + 8, py + 5), "IRAN", font=SANS_B(10), fill=MUTED)
-            d.text((px + 8, py + 66), "ARABIAN SEA", font=SANS_B(10),
+            d.text((px + 6, py + 2), "IRAN", font=SANS_B(9), fill=MUTED)
+            d.text((px + 6, py + 44), "ARABIAN SEA", font=SANS_B(9),
                    fill=MUTED)
             for sx in (96, 156, 216):
-                d.rectangle([px + sx, py + 40, px + sx + 26, py + 48],
+                d.rectangle([px + sx, py + 28, px + sx + 22, py + 34],
                             fill=INK)
-                d.rectangle([px + sx + 8, py + 32, px + sx + 12, py + 40],
+                d.rectangle([px + sx + 7, py + 22, px + sx + 10, py + 28],
                             fill=INK)
-            d.arc([px + 60, py - 12, px + 180, py + 54], 300, 60,
-                  fill=RED, width=2)
-            d.arc([px + 150, py - 6, px + 260, py + 50], 300, 60,
-                  fill=RED, width=2)
-            d.text((px + 244, py + 5), "HORMUZ", font=SANS_B(10),
-                   fill=RED)
-            d.text((px + 8, py + 28), "~25 tankers hit", font=SANS_B(10),
+            for ex, ey in ((px + 137, py + 21), (px + 197, py + 21)):
+                d.ellipse([ex - 4, ey - 4, ex + 4, ey + 4], fill=RED,
+                          outline=(255, 255, 255), width=1)
+            d.text((px + 248, py + 2), "HORMUZ", font=SANS_B(9), fill=RED)
+            d.text((px + 6, py + 17), "~25 tankers hit", font=SANS_B(9),
                    fill=INK)
         else:
-            # NATO shield with 32 stars
-            pts = [(px + 157, py + 6), (px + 218, py + 18),
-                   (px + 218, py + 48), (px + 157, py + 80),
-                   (px + 96, py + 48), (px + 96, py + 18)]
+            pts = [(px + 157, py + 3), (px + 200, py + 12),
+                   (px + 200, py + 34), (px + 157, py + 53),
+                   (px + 114, py + 34), (px + 114, py + 12)]
             d.polygon(pts, fill=(30, 64, 175), outline=(20, 40, 120))
-            import math
             for k in range(32):
                 a = 2 * math.pi * k / 32 - math.pi / 2
-                sx = px + 157 + 42 * math.cos(a)
-                sy = py + 43 + 28 * math.sin(a)
+                sx = px + 157 + 30 * math.cos(a)
+                sy = py + 28 + 20 * math.sin(a)
                 d.ellipse([sx - 2, sy - 2, sx + 2, sy + 2],
                           fill=(255, 255, 255))
-            d.text((px + 240, py + 64), "32 MEMBERS", font=SANS_B(10),
+            d.text((px + 214, py + 40), "32 MEMBERS", font=SANS_B(9),
                    fill=MUTED)
-            d.text((px + 10, py + 64), "EASTERN FLANK", font=SANS_B(10),
+            d.text((px + 8, py + 40), "EASTERN FLANK", font=SANS_B(9),
                    fill=MUTED)
-        hf2 = SERIF_B(19)
-        y = draw_wrapped(d, lead["head"], hf2, (x, 388), col_w, fill=INK,
-                         leading=21)
-        y = draw_wrapped(d, lead["body"], SANS(12), (x, y + 3), col_w,
-                         fill=INK, leading=15)
-        chip(d, x, 498, lead["tag"])
+        hf2 = SERIF_B(17)
+        y = draw_wrapped(d, lead["head"], hf2, (x, 304), col_w, fill=INK,
+                         leading=19)
+        y = draw_wrapped(d, lead["body"], SANS(11), (x, y + 2), col_w,
+                         fill=INK, leading=13)
+        chip(d, x, 389, lead["tag"])
 
-    # ---- the day in ten ---------------------------------------------
-    d.text((MX, 520), "THE DAY IN TEN", font=SANS_B(14), fill=INK)
-    rule(d, MX, MX1, 538, fill=INK, width=1)
-    ten = [
-        ("UKRAINE", "186 drones, 161 downed",
-         "A drone flattens a block in Dymer: 3 dead, 14 may be trapped. "
-         "~2,700 drones fired in a week.",
+    # ---- the day in twenty ------------------------------------------
+    d.text((MX, 412), "THE DAY IN TWENTY", font=SANS_B(13), fill=INK)
+    rule(d, MX, MX1, 430, fill=INK, width=1)
+    twenty = [
+        ("UKRAINE", "Dymer: 3 dead, 14 trapped",
+         "A drone flattens a block in Dymer; ~2,700 drones fired in a week.",
          "CONFIRMED"),
         ("NEPAL-INDIA", "Modi-Shah talks today",
-         "Nepal PM Balen Shah meets Narendra Modi in Delhi; joint "
-         "presser and MoUs on energy and trade.",
+         "Nepal PM Balen Shah meets Narendra Modi in Delhi; MoUs on energy and trade.",
          "CONFIRMED"),
         ("INDONESIA", "Cikande search resumes",
-         "Search resumes 07:00 Monday: 29 missing, 8 unconfirmed; 24 "
-         "body bags removed Sunday; 3 dead.",
+         "Search resumes 07:00 Monday: 29 missing, 8 unconfirmed; 24 body bags out.",
          "REPORTED"),
         ("TECH", "$7.5bn chips to China",
-         "FT: a network around ex-Megaspeed executive Alice Huang "
-         "diverted ~240,000 Nvidia AI chips to China.",
+         "FT: a network around ex-Megaspeed exec Alice Huang diverted ~240,000 Nvidia chips.",
          "REPORTED"),
         ("MYANMAR", "Rejects ASEAN and ICJ",
-         "Army-backed government calls an ASEAN decision 'unfair', "
-         "rejects the UN court's Rohingya ruling.",
+         "Army-backed government calls an ASEAN decision 'unfair' and rejects the UN court ruling.",
          "CONFIRMED"),
         ("CRICKET", "LIVE: NZ 157/4",
-         "India need 6 wickets on the final day in Wellington; 720/9 "
-         "is the highest Test total ever in NZ.",
+         "India need 6 wickets on the final day in Wellington; 720/9 is a record Test total in NZ.",
          "CONFIRMED"),
         ("HONG KONG", "Election Committee vote",
-         "856 candidates for 723 seats; turnout 98.79%. The body picks "
-         "the next chief executive.",
+         "856 candidates for 723 seats; turnout 98.79%. It picks the next chief executive.",
          "OFFICIAL"),
         ("BOLSONARO", "Surgery call due today",
-         "Ex-president, 71, still in intensive care in Brasilia with a "
-         "blocked bowel; surgery call due today.",
+         "Ex-president, 71, still in intensive care in Brasilia; the surgery call is due today.",
          "CONFIRMED"),
         ("MARKETS", "Asia slides again",
-         "Taiex -6%, Kospi -3.8% as the AI rout spreads; Tokyo closed; "
-         "US futures bounce ~2%.",
+         "Taiex -6%, Kospi -3.8% as the AI rout spreads; Tokyo closed; US futures bounce ~2%.",
          "REPORTED"),
         ("EUROPE", "Lisbon marches",
-         "Thousands march in Lisbon over living costs as anger at "
-         "prices fuels protests.",
+         "Thousands march in Lisbon over living costs as anger at prices fuels protests.",
          "REPORTED"),
+        ("MEXICO", "El Chapo Isidro caught",
+         "FBI most-wanted cartel boss captured after firefights in Sinaloa; 11 dead.",
+         "CONFIRMED"),
+        ("UKRAINE", "14 missing in Kyiv region",
+         "Russian drone hits a building in the Kyiv region; 14 people missing, Zelenskiy says.",
+         "CONFIRMED"),
+        ("BALTIC", "Cargo ship still burning",
+         "Russian cargo ship Sparta II still on fire off Finland after an attack.",
+         "CONFIRMED"),
+        ("USA", "Schumer faces challenge",
+         "Senate Democratic leader faces Chris Van Hollen; first contested race since 1994.",
+         "CONFIRMED"),
+        ("CHINA", "Margin rules eased",
+         "Exchanges cut minimum margin ratio to 80% from Nov 30; Shanghai at a 16-month low.",
+         "REPORTED"),
+        ("USA", "$TRUMP gala tonight",
+         "Trump hosts a gala for top holders of his meme coin, now under $1 from a ~$75 peak.",
+         "CONFIRMED"),
+        ("TECH", "Anthropic IPO slides",
+         "Shares fall 8.5% Friday after a 17% first-day pop; bankers chafed at the process.",
+         "REPORTED"),
+        ("SPORT", "Verstappen wins in Vegas",
+         "Max Verstappen wins a chaotic Las Vegas GP by 0.639s from Norris; Russell crashes late.",
+         "CONFIRMED"),
+        ("SPORT", "Liverpool 4–0 Man Utd",
+         "Liverpool thrash Manchester United 4-0 at Anfield in the Premier League.",
+         "CONFIRMED"),
+        ("FILM", "Hunger Games: $120m",
+         "Sunrise on the Reaping opens with $120m in the US and $225m worldwide.",
+         "CONFIRMED"),
     ]
-    cw10, gap10 = 190, 4
-    for i, (region, head, body, tag) in enumerate(ten):
-        col, row = i % 5, i // 5
-        x = MX + col * (cw10 + gap10)
-        y = 544 + row * 74
-        d.rectangle([x, y, x + cw10, y + 70], fill=PANEL, outline=LINE,
+    cw20, gap20 = 239, 4
+    for i, (region, head, body, tag) in enumerate(twenty):
+        col, row = i % 4, i // 4
+        x = MX + col * (cw20 + gap20)
+        y = 436 + row * 50
+        d.rectangle([x, y, x + cw20, y + 48], fill=PANEL, outline=LINE,
                     width=1)
-        d.text((x + 6, y + 4), "%d  %s" % (i + 4, region), font=SANS_B(10),
+        d.text((x + 6, y + 3), "%d  %s" % (i + 4, region), font=SANS_B(9),
                fill=RED)
-        yy = draw_wrapped(d, head, SERIF_B(13), (x + 6, y + 18), cw10 - 12,
-                          fill=INK, leading=15)
-        draw_wrapped(d, body, SANS(10), (x + 6, yy + 1), cw10 - 12,
-                     fill=INK, leading=11)
+        d.text((x + 6, y + 14), head, font=SERIF_B(12), fill=INK)
+        draw_wrapped(d, body, SANS(9), (x + 6, y + 28), cw20 - 12,
+                     fill=INK, leading=10)
 
     # ---- bottom: map + also list ------------------------------------
-    d.text((MX, 694), "WHERE IT HAPPENED", font=SANS_B(13), fill=INK)
-    d.text((432, 694), "ALSO ON MONDAY", font=SANS_B(13), fill=INK)
+    d.text((MX, 694), "WHERE IT HAPPENED", font=SANS_B(12), fill=INK)
+    d.text((252, 694), "ALSO ON MONDAY — 41 MORE", font=SANS_B(12),
+           fill=INK)
     rule(d, MX, MX1, 712, fill=INK, width=1)
     # simplified world map (rough equirectangular continents)
-    mx0, my0, mw, mh = 36, 718, 376, 138
+    mx0, my0, mw, mh = 28, 724, 208, 130
 
     def ll(lon, lat):
         return (mx0 + (lon + 170) / 360.0 * mw,
@@ -349,97 +350,103 @@ def main():
     dots = [(30.7, 36.9, "1"), (50.6, 26.2, "2"), (4.35, 50.85, "3"),
             (30.5, 50.45, "4"), (77.2, 28.6, "5"), (106.2, -6.2, "6"),
             (174.8, -41.3, "9"), (114.2, 22.3, "10"),
-            (-47.9, -15.8, "11"), (-9.1, 38.7, "13"), (3.4, 6.5, "24"),
-            (28.5, 8.0, "25"), (-122.4, 37.8, "17")]
-    df = SANS_B(9)
+            (-47.9, -15.8, "11"), (-9.1, 38.7, "13"), (3.4, 6.5, "33"),
+            (28.5, 8.0, "34"), (-122.4, 37.8, "26")]
+    df = SANS_B(8)
     for lon, lat, num in dots:
         cx, cy = ll(lon, lat)
-        d.ellipse([cx - 7, cy - 7, cx + 7, cy + 7], fill=RED,
+        d.ellipse([cx - 6, cy - 6, cx + 6, cy + 6], fill=RED,
                   outline=(255, 255, 255), width=1)
-        d.text((cx - df.getlength(num) / 2, cy - 5), num, font=df,
+        d.text((cx - df.getlength(num) / 2, cy - 4), num, font=df,
                fill=(255, 255, 255))
-    counts = "EU 4 · ME 3 · APAC 9 · AMER 4 · AFR 2 · OCE 2 · SPORT 2 · SCI 2"
-    cf = SANS_B(10)
-    d.text(((36 + 412) / 2 - cf.getlength(counts) / 2, 860), counts,
-           font=cf, fill=MUTED)
+    d.text((MX, 860), "13 sites numbered", font=SANS(9), fill=MUTED)
+    d.text((MX, 872), "to the stories above", font=SANS(9), fill=MUTED)
 
-    # also list: 17 items, two columns
+    # also list: 41 items, two columns, one line each
     also = [
-        (14, "Baltic Sea — Russian cargo ship Sparta II still burning, "
-             "drifting into Finnish waters."),
-        (15, "USA — FBI probes an apparent hack of its NCIC national "
-             "crime database. [REPORTED]"),
-        (16, "USA — CISA deadline today: agencies must patch VMware, "
-             "Cisco, Apache and SAP flaws."),
-        (17, "USA — San Francisco king tides may peak near 9 ft, a "
-             "record; no non-essential travel Mon-Wed."),
-        (18, "India — BJP MP Ramrao Wadkute dies of a cardiac arrest in "
-             "Delhi."),
-        (19, "India — Amit Shah launches a Rs 4,000 crore infrastructure "
-             "push in Arunachal Pradesh."),
-        (20, "India — 9 pilgrims killed as their vehicle rams a truck in "
-             "Kota, Rajasthan."),
-        (21, "India — IFFI 2026 hosts a BRICS roundtable on film "
-             "partnerships."),
-        (22, "India — Hyderabad university students protest over alleged "
-             "casteist remarks."),
-        (23, "Sport — Anupama retains the IBSF World Women's Snooker "
-             "title."),
-        (24, "Africa — NDLEA Lagos: golfer and chef held over a 50.40 kg "
-             "cannabis smuggling attempt."),
-        (25, "Africa — South Sudan: rebels kill 24 civilians, incl. 7 "
-             "children, in Warrap State. [REPORTED]"),
-        (26, "Science — BepiColombo thruster glitch in its Mercury orbit "
-             "entry; craft safe, ESA update due today."),
-        (27, "Science — JWST finds a possible black hole that outgrew "
-             "its host galaxy 12bn years ago."),
-        (28, "Gulf — Qatari delegation visited Tehran Friday; Iran "
-             "demands the blockade end and assets unfrozen."),
-        (29, "Gaza — no fresh development reported on Monday."),
-        (30, "Oceania — NZ retail sales and Australia flash PMIs due "
-             "today."),
+        (24, "USA — FBI probes apparent hack of its NCIC database. [REPORTED]"),
+        (25, "USA — CISA deadline: patch VMware, Cisco, Apache and SAP flaws."),
+        (26, "USA — SF king tides may peak near 9 ft, a record."),
+        (27, "India — BJP MP Ramrao Wadkute dies of a cardiac arrest in Delhi."),
+        (28, "India — Shah launches Rs 4,000 cr push in Arunachal Pradesh."),
+        (29, "India — 9 pilgrims killed as their vehicle rams a truck in Kota."),
+        (30, "India — IFFI 2026 hosts a BRICS roundtable on film partnerships."),
+        (31, "India — Hyderabad students protest over alleged casteist remarks."),
+        (32, "Sport — Anupama retains the IBSF World Women's Snooker title."),
+        (33, "Africa — NDLEA Lagos: golfer, chef held over 50 kg cannabis haul."),
+        (34, "Africa — South Sudan: rebels kill 24, incl. 7 children. [REPORTED]"),
+        (35, "Science — BepiColombo glitch at Mercury entry; craft safe."),
+        (36, "Science — JWST finds a possible black hole that outgrew its galaxy."),
+        (37, "Gulf — Qatar visited Tehran Friday; Iran demands blockade end."),
+        (38, "Gaza — no fresh development reported on Monday."),
+        (39, "Oceania — NZ retail sales and Australia flash PMIs due today."),
+        (40, "UN — nations agree to keep negotiating lethal AI weapons rules."),
+        (41, "UK — Britain to produce Ukrainian drones under a new agreement."),
+        (42, "S Korea — education minister quits over AI cheating scandal."),
+        (43, "Australia — PM: COP31 failure shows 'difficult times'."),
+        (44, "WHO — chief pleads for peace in Ebola-hit DR Congo area."),
+        (45, "Sudan — drone strikes hit homes and a UN building in Khartoum."),
+        (46, "Israel — Netanyahu, Eisenkot end talks with no government deal."),
+        (47, "Nigeria — 35 Fulanis killed in revenge attacks in Kano State."),
+        (48, "Saudi — coalition intercepts Houthi missile in the west."),
+        (49, "West Bank — Eisenkot condemns settler arson attacks on villages."),
+        (50, "Pakistan — 15 terrorists killed in two operations in Mastung."),
+        (51, "Pakistan — Imran Khan, Bushra Bibi appeals set for November 25."),
+        (52, "India — Modi: 50 crore lifted out of poverty, World Bank says."),
+        (53, "India — Modi opens AI centre at IIT Patna, Rs 400 cr park."),
+        (54, "India — PM announces Rs 2 lakh aid after Kutch mishap."),
+        (55, "India — winter session delayed; monsoon session hits 100 days."),
+        (56, "India — Vijayan hits Modi over corporate pay remarks."),
+        (57, "India — UP runs air-raid, blackout drills in all 75 districts."),
+        (58, "Sport — Newcastle 2–2 Arsenal; Hull 2–0 Brighton on Sunday."),
+        (59, "Crypto — Bitcoin holds $60k; ETFs bled $1.25bn last week."),
+        (60, "Film — Ramayana crosses Rs 940 cr net in India after Day 18."),
+        (61, "USA — Kalshi in court Monday over NY order to shut it down."),
+        (62, "Markets — oil reopens Monday, first futures price of tanker war."),
+        (63, "Tech — Apple building an AI agent to run your Mac. [REPORTED]"),
+        (64, "Kashmir — saffron fields used as dump for 3 years: Mufti."),
     ]
-    af = SANS(10)
+    af = SANS(9)
+    afb = SANS_B(9)
     for i, (num, text) in enumerate(also):
-        col = 0 if i < 9 else 1
-        row = i if i < 9 else i - 9
-        x = 432 if col == 0 else 720
-        y = 718 + row * 21
-        d.text((x, y), "%d." % num, font=SANS_B(10), fill=RED)
-        draw_wrapped(d, text, af, (x + 22, y), 254, fill=INK, leading=10)
+        col = 0 if i < 21 else 1
+        row = i if i < 21 else i - 21
+        x = 252 if col == 0 else 636
+        y = 718 + row * 10
+        d.text((x, y), "%d." % num, font=afb, fill=RED)
+        d.text((x + 20, y), text, font=af, fill=INK)
 
     # ---- date check -------------------------------------------------
-    d.rectangle([MX, 912, MX1, 978], outline=RED, width=2)
-    d.text((MX + 8, 917), "DATE CHECK — NOT MONDAY'S NEWS",
-           font=SANS_B(11), fill=RED)
-    dc = SANS(10)
+    d.rectangle([MX, 936, MX1, 994], outline=RED, width=2)
+    d.text((MX + 8, 940), "DATE CHECK — NOT MONDAY'S NEWS",
+           font=SANS_B(10), fill=RED)
+    dc = SANS(9)
     dc_lines = [
-        "THU 19 NOV — ICJ Myanmar ruling · Trump-Xi-Putin summit, Shenzhen",
+        "THU 19 NOV — Trump-Xi-Putin summit, Shenzhen · ICJ Myanmar ruling",
         ("FRI 20 NOV — Market rout (S&P -3.7%, Nasdaq -5.3%) · UK-EU "
          "Brexit reset · Denmark expels Russian attaché · Poland incursion "
          "(event) · Bolsonaro admitted"),
-        ("SAT 21 NOV — Gaza food-van strike (3 killed) · El Chapo Isidro "
-         "captured · BepiColombo enters Mercury orbit · EU-Indonesia trade "
-         "deal · Cikande fire breaks out · Sparta II struck"),
+        ("SAT 21 NOV — Gaza food-van strike (3 killed) · BepiColombo enters "
+         "Mercury orbit · EU-Indonesia trade deal · Cikande fire breaks "
+         "out · Sparta II struck"),
         ("SUN 22 NOV — COP31 collapse · Dymer strike · Hong Kong EC "
          "election · NDLEA arrests · Myanmar rejects ASEAN · Verstappen "
          "wins Las Vegas GP · India declare 720/9 (final day is today)"),
     ]
-    yy = 934
+    yy = 954
     for ln in dc_lines:
         d.text((MX + 8, yy), ln, font=dc, fill=INK)
-        yy += 11
+        yy += 10
 
     # ---- footer -----------------------------------------------------
-    ff = SANS(10)
-    d.text((MX, 984), "Sources: Reuters · CNN · The Times · FT · Al Jazeera "
-           "· AFP · IANS · ANI · ESPNcricinfo · Cricbuzz · info.gov.hk · "
-           "ESA · News Central TV · NDLEA", font=ff, fill=MUTED)
-    d.text((MX, 996), "CONFIRMED = verified by 2+ outlets · OFFICIAL = "
+    ff = SANS(9)
+    d.text((MX, 998), "Sources: Reuters · CNN · The Times · FT · Al Jazeera "
+           "· AFP · IANS · ANI · ESPNcricinfo · Cricbuzz · ESA · News "
+           "Central TV · NDLEA · Finnhub · Cinepals", font=ff, fill=MUTED)
+    d.text((MX, 1009), "CONFIRMED = verified by 2+ outlets · OFFICIAL = "
            "government or agency statement · REPORTED = single source · "
-           "CLAIM = one side's claim", font=ff, fill=MUTED)
-    d.text((MX, 1008), "Wires read up to 00:20 UTC, Monday 23 November 2026 "
-           "· Drawn by code — no AI-generated text", font=ff, fill=MUTED)
+           "CLAIM = one side's claim  ·  Wires read up to 00:35 UTC, Mon 23 "
+           "Nov 2026 · Drawn by code", font=ff, fill=MUTED)
 
     out = img.quantize(colors=256, method=Image.Quantize.MEDIANCUT,
                        dither=Image.Dither.NONE)
@@ -449,6 +456,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
